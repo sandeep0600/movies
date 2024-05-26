@@ -9,31 +9,37 @@
 
     &__content {
         max-width: 1000px;
+        margin: 0 auto; // Center the content
 
         &__logo {
             @include flex(center, center);
             margin-bottom: 3rem;
-        }
+            text-align: center;
 
-        &__menus {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-
-            @include mobile {
-                grid-template-columns: repeat(2, 1fr);
+            .logo {
+                display: flex;
+                align-items: center;
+                img {
+                    height: 50px;
+                    margin-right: 1rem;
+                }
+                a {
+                    font-size: 2rem;
+                    font-weight: bold;
+                    color: #fff;
+                }
             }
         }
 
-        &__menu {
-            @include flex(flex-start, flex-start);
-            flex-direction: column;
-            margin-top: 1rem;
-
-            font-size: 1.5rem;
-            font-weight: 600;
-
-            & > * ~ * {
-                margin-top: 1rem;
+        &__info {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #fff;
+            line-height: 1.5;
+            margin-top: 2rem;
+            
+            p {
+                margin: 0.5rem 0;
             }
         }
     }

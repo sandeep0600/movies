@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-
 import SwiperCore, { Autoplay } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
+import { useHistory } from 'react-router-dom';
 
 import Button, { OutlineButton } from '../button/Button';
 import Modal, { ModalContent } from '../modal/Modal';
@@ -9,26 +9,24 @@ import Modal, { ModalContent } from '../modal/Modal';
 import tmdbApi, { category, movieType } from '../../api/tmdbApi';
 import apiConfig from '../../api/apiConfig';
 
+import 'swiper/swiper-bundle.min.css';
 import './hero-slide.scss';
-import { useHistory } from 'react-router';
+
+SwiperCore.use([Autoplay]);
 
 const HeroSlide = () => {
-
-    SwiperCore.use([Autoplay]);
-
     const [movieItems, setMovieItems] = useState([]);
 
     useEffect(() => {
         const getMovies = async () => {
-            const params = {page: 1}
+            const params = { page: 1 };
             try {
-                const response = await tmdbApi.getMoviesList(movieType.popular, {params});
-                setMovieItems(response.results.slice(1, 4));
-                console.log(response);
-            } catch {
-                console.log('error');
+                const response = await tmdbApi.getMoviesList(movieType.popular, { params });
+                setMovieItems(response.results.slice(0, 4));
+            } catch (error) {
+                console.error('Failed to fetch movie list:', error);
             }
-        }
+        };
         getMovies();
     }, []);
 
@@ -39,59 +37,65 @@ const HeroSlide = () => {
                 grabCursor={true}
                 spaceBetween={0}
                 slidesPerView={1}
-                // autoplay={{delay: 3000}}
+                autoplay={{ delay: 3000 }}
             >
-                {
-                    movieItems.map((item, i) => (
-                        <SwiperSlide key={i}>
-                            {({ isActive }) => (
-                                <HeroSlideItem item={item} className={`${isActive ? 'active' : ''}`} />
-                            )}
-                        </SwiperSlide>
-                    ))
-                }
+                {movieItems.map((item, i) => (
+                    <SwiperSlide key={i}>
+                        {({ isActive }) => (
+                            <HeroSlideItem item={item} className={isActive ? 'active' : ''} />
+                        )}
+                    </SwiperSlide>
+                ))}
             </Swiper>
-            {
-                movieItems.map((item, i) => <TrailerModal key={i} item={item}/>)
-            }
+            {movieItems.map((item, i) => <TrailerModal key={i} item={item} />)}
         </div>
     );
-}
+};
 
-const HeroSlideItem = props => {
-
-    let hisrory = useHistory();
-
-    const item = props.item;
+const HeroSlideItem = ({ item, className }) => {
+    const history = useHistory();
 
     const background = apiConfig.originalImage(item.backdrop_path ? item.backdrop_path : item.poster_path);
 
     const setModalActive = async () => {
         const modal = document.querySelector(`#modal_${item.id}`);
 
-        const videos = await tmdbApi.getVideos(category.movie, item.id);
-
-        if (videos.results.length > 0) {
-            const videSrc = 'https://www.youtube.com/embed/' + videos.results[0].key;
-            modal.querySelector('.modal__content > iframe').setAttribute('src', videSrc);
-        } else {
-            modal.querySelector('.modal__content').innerHTML = 'No trailer';
+        try {
+            const videos = await tmdbApi.getVideos(category.movie, item.id);
+            if (videos.results.length > 0) {
+                const videoSrc = 'https://www.youtube.com/embed/' + videos.results[0].key;
+                modal.querySelector('.modal__content > iframe').setAttribute('src', videoSrc);
+            } else {
+                modal.querySelector('.modal__content').innerHTML = 'No trailer';
+            }
+            modal.classList.toggle('active');
+        } catch (error) {
+            console.error('Failed to fetch videos:', error);
+            modal.querySelector('.modal__content').innerHTML = 'No trailer available';
         }
+    };
 
-        modal.classList.toggle('active');
-    }
+    const getWatchNowUrl = (item) => {
+        if (item.imdb_id) {
+            return `https://vidsrc.xyz/embed/movie?imdb=${item.imdb_id}`;
+        } else if (item.id) {
+            return `https://vidsrc.xyz/embed/movie?tmdb=${item.id}`;
+        } else {
+            return '#';
+        }
+    };
 
     return (
         <div
-            className={`hero-slide__item ${props.className}`}
-            style={{backgroundImage: `url(${background})`}}
+            className={`hero-slide__item ${className}`}
+            style={{ backgroundImage: `url(${background})` }}
         >
             <div className="hero-slide__item__content container">
                 <div className="hero-slide__item__content__info">
                     <h2 className="title">{item.title}</h2>
                     <div className="overview">{item.overview}</div>
                     <div className="btns">
-                        <Button onClick={() => hisrory.push('/movie/' + item.id)}>
+                        <Button onClick={() => window.open(getWatchNowUrl(item), '_blank')}>
                             Watch now
                         </Button>
                         <OutlineButton onClick={setModalActive}>
@@ -100,16 +104,14 @@ const HeroSlideItem = props => {
                     </div>
                 </div>
                 <div className="hero-slide__item__content__poster">
-                    <img src={apiConfig.w500Image(item.poster_path)} alt="" />
+                    <img src={apiConfig.w500Image(item.poster_path)} alt={item.title} />
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
 
-const TrailerModal = props => {
-    const item = props.item;
-
+const TrailerModal = ({ item }) => {
     const iframeRef = useRef(null);
 
     const onClose = () => iframeRef.current.setAttribute('src', '');
@@ -120,7 +122,7 @@ const TrailerModal = props => {
                 <iframe ref={iframeRef} width="100%" height="500px" title="trailer"></iframe>
             </ModalContent>
         </Modal>
-    )
-}
+    );
+};
 
 export default HeroSlide;

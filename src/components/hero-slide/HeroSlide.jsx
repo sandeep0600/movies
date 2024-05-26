@@ -22,7 +22,7 @@ const HeroSlide = () => {
 
     useEffect(() => {
         const getMovies = async () => {
-            const params = {page: 1}
+            const params = {page: 1};
             try {
                 const response = await tmdbApi.getMoviesList(movieType.popular, {params});
                 setMovieItems(response.results.slice(1, 4));
@@ -46,7 +46,7 @@ const HeroSlide = () => {
                 grabCursor={true}
                 spaceBetween={0}
                 slidesPerView={1}
-                autoplay={{delay: 3000}}
+                autoplay={{delay: 5000}}  {/* Slowing down the slide animation */}
             >
                 {
                     movieItems.map((item, i) => (
@@ -105,7 +105,7 @@ const HeroSlideItem = ({ item, className, openEmbedModal }) => {
     }
 
     const handleWatchNow = () => {
-        const embedUrl = `https://vidsrc.to/embed/movie?tmdb=${item.id}`;
+        const embedUrl = `https://vidsrc.to/embed/movie/${item.id}`;
         openEmbedModal(embedUrl);
     }
 

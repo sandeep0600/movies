@@ -31,8 +31,8 @@ const Detail = () => {
 
     const openEmbedModal = () => {
         const embedUrl = category === 'movie' 
-            ? `https://vidsrc.xyz/embed/movie?tmdb=${id}` 
-            : `https://vidsrc.xyz/embed/tv?tmdb=${id}`;
+            ? `https://vidsrc.to/embed/movie/${id}` 
+            : `https://vidsrc.to/embed/tv/${id}`;
         setEmbedUrl(embedUrl);
         setIsModalOpen(true);
     }
@@ -105,4 +105,3 @@ const Detail = () => {
 }
 
 export default Detail;
-

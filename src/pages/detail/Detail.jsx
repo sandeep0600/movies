@@ -9,12 +9,16 @@ import CastList from './CastList';
 import VideoList from './VideoList';
 
 import MovieList from '../../components/movie-list/MovieList';
+import Button from '../../components/button/Button';
+import Modal, { ModalContent } from '../../components/modal/Modal';
 
 const Detail = () => {
 
     const { category, id } = useParams();
 
     const [item, setItem] = useState(null);
+    const [embedUrl, setEmbedUrl] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         const getDetail = async () => {
@@ -24,6 +28,14 @@ const Detail = () => {
         }
         getDetail();
     }, [category, id]);
+
+    const openEmbedModal = () => {
+        const embedUrl = category === 'movie' 
+            ? `https://vidsrc.xyz/embed/movie?tmdb=${id}` 
+            : `https://vidsrc.xyz/embed/tv?tmdb=${id}`;
+        setEmbedUrl(embedUrl);
+        setIsModalOpen(true);
+    }
 
     return (
         <>
@@ -47,6 +59,11 @@ const Detail = () => {
                                     }
                                 </div>
                                 <p className="overview">{item.overview}</p>
+                                <div className="btns">
+                                    <Button onClick={openEmbedModal}>
+                                        Watch Now
+                                    </Button>
+                                </div>
                                 <div className="cast">
                                     <div className="section__header">
                                         <h2>Casts</h2>
@@ -66,6 +83,20 @@ const Detail = () => {
                                 <MovieList category={category} type="similar" id={item.id}/>
                             </div>
                         </div>
+                        {isModalOpen && 
+                            <Modal active={isModalOpen} id="embedModal" onClose={() => setIsModalOpen(false)}>
+                                <ModalContent onClose={() => setIsModalOpen(false)}>
+                                    <iframe 
+                                        src={embedUrl} 
+                                        width="100%" 
+                                        height="500px" 
+                                        title="movie-embed"
+                                        frameBorder="0" 
+                                        allowFullScreen
+                                    ></iframe>
+                                </ModalContent>
+                            </Modal>
+                        }
                     </>
                 )
             }
@@ -74,3 +105,4 @@ const Detail = () => {
 }
 
 export default Detail;
+

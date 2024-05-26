@@ -2,13 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import SwiperCore, { Autoplay } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { useHistory } from 'react-router-dom';
-
 import Button, { OutlineButton } from '../button/Button';
 import Modal, { ModalContent } from '../modal/Modal';
-
 import tmdbApi, { category, movieType } from '../../api/tmdbApi';
 import apiConfig from '../../api/apiConfig';
-
 import 'swiper/swiper-bundle.min.css';
 import './hero-slide.scss';
 
@@ -54,6 +51,8 @@ const HeroSlide = () => {
 
 const HeroSlideItem = ({ item, className }) => {
     const history = useHistory();
+    const [modalUrl, setModalUrl] = useState('');
+    const [modalId, setModalId] = useState(null);
 
     const background = apiConfig.originalImage(item.backdrop_path ? item.backdrop_path : item.poster_path);
 
@@ -81,7 +80,16 @@ const HeroSlideItem = ({ item, className }) => {
         } else if (item.id) {
             return `https://vidsrc.xyz/embed/movie?tmdb=${item.id}`;
         } else {
-            return '#';
+            return '';
+        }
+    };
+
+    const handleWatchNowClick = () => {
+        const url = getWatchNowUrl(item);
+        if (url) {
+            setModalUrl(url);
+            setModalId(`video_modal_${item.id}`);
+            document.querySelector(`#video_modal_${item.id}`).classList.add('active');
         }
     };
 
@@ -95,7 +103,7 @@ const HeroSlideItem = ({ item, className }) => {
                     <h2 className="title">{item.title}</h2>
                     <div className="overview">{item.overview}</div>
                     <div className="btns">
-                        <Button onClick={() => window.open(getWatchNowUrl(item), '_blank')}>
+                        <Button onClick={handleWatchNowClick}>
                             Watch now
                         </Button>
                         <OutlineButton onClick={setModalActive}>
@@ -107,6 +115,7 @@ const HeroSlideItem = ({ item, className }) => {
                     <img src={apiConfig.w500Image(item.poster_path)} alt={item.title} />
                 </div>
             </div>
+            <VideoModal id={`video_modal_${item.id}`} url={modalUrl} />
         </div>
     );
 };
@@ -114,12 +123,34 @@ const HeroSlideItem = ({ item, className }) => {
 const TrailerModal = ({ item }) => {
     const iframeRef = useRef(null);
 
-    const onClose = () => iframeRef.current.setAttribute('src', '');
+    const onClose = () => {
+        if (iframeRef.current) {
+            iframeRef.current.setAttribute('src', '');
+        }
+    };
 
     return (
         <Modal active={false} id={`modal_${item.id}`}>
             <ModalContent onClose={onClose}>
                 <iframe ref={iframeRef} width="100%" height="500px" title="trailer"></iframe>
+            </ModalContent>
+        </Modal>
+    );
+};
+
+const VideoModal = ({ id, url }) => {
+    const iframeRef = useRef(null);
+
+    const onClose = () => {
+        if (iframeRef.current) {
+            iframeRef.current.setAttribute('src', '');
+        }
+    };
+
+    return (
+        <Modal active={false} id={id}>
+            <ModalContent onClose={onClose}>
+                <iframe ref={iframeRef} width="100%" height="500px" title="video" src={url}></iframe>
             </ModalContent>
         </Modal>
     );

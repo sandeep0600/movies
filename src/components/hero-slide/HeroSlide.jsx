@@ -22,9 +22,9 @@ const HeroSlide = () => {
 
     useEffect(() => {
         const getMovies = async () => {
-            const params = {page: 1};
+            const params = { page: 1 };
             try {
-                const response = await tmdbApi.getMoviesList(movieType.popular, {params});
+                const response = await tmdbApi.getMoviesList(movieType.popular, { params });
                 setMovieItems(response.results.slice(1, 4));
                 console.log(response);
             } catch {
@@ -46,7 +46,7 @@ const HeroSlide = () => {
                 grabCursor={true}
                 spaceBetween={0}
                 slidesPerView={1}
-                autoplay={{delay: 5000}}  {/* Slowing down the slide animation */}
+                autoplay={{ delay: 5000 }}  // Slowing down the slide animation
             >
                 {
                     movieItems.map((item, i) => (
@@ -63,7 +63,7 @@ const HeroSlide = () => {
                 }
             </Swiper>
             {
-                movieItems.map((item, i) => <TrailerModal key={i} item={item}/>)
+                movieItems.map((item, i) => <TrailerModal key={i} item={item} />)
             }
             {isModalOpen && 
                 <Modal active={isModalOpen} id="embedModal" onClose={() => setIsModalOpen(false)}>

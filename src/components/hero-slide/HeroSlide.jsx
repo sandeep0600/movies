@@ -105,7 +105,7 @@ const HeroSlideItem = ({ item, className, openEmbedModal }) => {
     }
 
     const handleWatchNow = () => {
-        const embedUrl = `https://vidsrc.to/embed/movie/${item.id}`;
+        const embedUrl = `https://vidsrc.net/embed/movie/${item.id}`;
         openEmbedModal(embedUrl);
     }
 
